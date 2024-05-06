@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remove Spaces and Newlines</title>
+<style>
+  #drop_zone {
+    border: 2px dashed #bbb;
+    border-radius: 5px;
+    padding: 25px;
+    text-align: center;
+    color: #bbb;
+    font-size: 20px;
+  }
+  #content_display {
+    margin-top: 20px;
+    white-space: pre-wrap; /* Preserve whitespace and newlines */
+    word-break: break-all; /* Ensure long lines wrap */
+  }
+  #copy_button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  #stats {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+  }
+  #substring_input {
+    margin-top: 10px;
+    padding: 5px;
+  }
+  #substring_button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  #content_input {
+    margin-top: 20px;
+    width: 100%;
+    height: 100px;
+  }
+  #process_button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div id="drop_zone">将文件拖放到这里</div>
+<button id="select_file_button">选择文件</button>
+<textarea id="content_input" placeholder="输入或粘贴文本"></textarea>
+<button id="process_button">处理文本</button>
+<div id="content_display" style="display:none;"></div>
+<button id="copy_button" style="display:none;">复制内容</button>
+<div id="stats" style="display:none;"></div>
+<input type="number" id="substring_input" placeholder="输入截取长度" style="display:none;">
+<button id="substring_button" style="display:none;">截取内容</button>
+
+<script>
+  const dropZone = document.getElementById('drop_zone');
+  const contentDisplay = document.getElementById('content_display');
+  const copyButton = document.getElementById('copy_button');
+  const stats = document.getElementById('stats');
+  const substringInput = document.getElementById('substring_input');
+  const substringButton = document.getElementById('substring_button');
+  const contentInput = document.getElementById('content_input');
+  const processButton = document.getElementById('process_button');
+  const selectFileButton = document.getElementById('select_file_button');
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('active');
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('active');
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('active');
+    handleFile(e.dataTransfer.files[0]);
+  });
+
+  selectFileButton.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '*'; // 接受文本文件
+    input.onchange = (e) => {
+      handleFile(e.target.files[0]);
+    };
+    input.click();
+  });
+
+  processButton.addEventListener('click', () => {
+    const text = contentInput.value;
+    const processedText = text.replace(/[\s\n]+/g, ''); // Remove spaces and newlines
+    contentDisplay.textContent = processedText;
+    contentDisplay.style.display = 'block';
+    copyButton.style.display = 'block';
+    stats.style.display = 'block';
+    stats.textContent = `字数: ${processedText.length}`;
+    substringInput.style.display = 'block';
+    substringButton.style.display = 'block';
+  });
+
+  function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const processedText = text.replace(/[\s\n]+/g, ''); // Remove spaces and newlines
+      contentDisplay.textContent = processedText;
+      contentDisplay.style.display = 'block';
+      copyButton.style.display = 'block';
+      stats.style.display = 'block';
+      stats.textContent = `字数: ${processedText.length}`;
+      substringInput.style.display = 'block';
+      substringButton.style.display = 'block';
+    };
+    reader.readAsText(file);
+  }
+
+  copyButton.addEventListener('click', () => {
+    navigator.clipboard.writeText(contentDisplay.textContent).then(function() {
+      alert('复制成功');
+    }).catch(function(err) {
+      alert('复制失败: ' + err);
+    });
+  });
+
+  substringButton.addEventListener('click', () => {
+    const length = parseInt(substringInput.value);
+    if (!isNaN(length) && length > 0) {
+      const substring = contentDisplay.textContent.substring(0, length);
+      contentDisplay.textContent = substring;
+      stats.textContent = `字数: ${substring.length}`;
+    } else {
+      alert('请输入有效的截取长度');
+    }
+  });
+</script>
+
+</body>
+</html>
